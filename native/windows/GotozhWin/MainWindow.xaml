@@ -1,0 +1,125 @@
+<Window x:Class="GotozhWin.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="using:GotozhWin"
+        Title="gotozh 台灣用語轉換">
+    <Grid Padding="16" RowSpacing="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="260" />
+        </Grid.RowDefinitions>
+
+        <CommandBar Grid.Row="0" DefaultLabelPosition="Right" HorizontalAlignment="Left">
+            <AppBarButton Icon="OpenFile" Label="開啟文字檔…" Click="OpenFile_Click">
+                <AppBarButton.KeyboardAccelerators>
+                    <KeyboardAccelerator Modifiers="Control" Key="O" />
+                </AppBarButton.KeyboardAccelerators>
+            </AppBarButton>
+            <AppBarButton x:Name="ScanButton" Icon="Find" Label="開始掃描" Click="Scan_Click">
+                <AppBarButton.KeyboardAccelerators>
+                    <KeyboardAccelerator Modifiers="Control" Key="Enter" />
+                </AppBarButton.KeyboardAccelerators>
+            </AppBarButton>
+            <AppBarButton x:Name="ReplaceAllButton" Icon="Switch" Label="全部替換一般用語" Click="ReplaceAll_Click" IsEnabled="False">
+                <AppBarButton.KeyboardAccelerators>
+                    <KeyboardAccelerator Modifiers="Control,Shift" Key="R" />
+                </AppBarButton.KeyboardAccelerators>
+            </AppBarButton>
+            <AppBarSeparator />
+            <AppBarButton x:Name="CopyButton" Icon="Copy" Label="複製結果" Click="Copy_Click" IsEnabled="False">
+                <AppBarButton.KeyboardAccelerators>
+                    <KeyboardAccelerator Modifiers="Control,Shift" Key="C" />
+                </AppBarButton.KeyboardAccelerators>
+            </AppBarButton>
+            <AppBarButton x:Name="SaveButton" Icon="Save" Label="儲存結果…" Click="Save_Click" IsEnabled="False">
+                <AppBarButton.KeyboardAccelerators>
+                    <KeyboardAccelerator Modifiers="Control" Key="S" />
+                </AppBarButton.KeyboardAccelerators>
+            </AppBarButton>
+        </CommandBar>
+
+        <Grid Grid.Row="1" ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid RowSpacing="6">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid>
+                    <TextBlock Text="原文" Style="{StaticResource SubtitleTextBlockStyle}" />
+                    <TextBlock x:Name="SourceCount" HorizontalAlignment="Right" VerticalAlignment="Bottom" Opacity="0.7" Text="0 字" />
+                </Grid>
+                <TextBox x:Name="SourceBox" Grid.Row="1" AcceptsReturn="True" TextWrapping="Wrap"
+                         FontFamily="Consolas, Microsoft JhengHei UI" FontSize="15"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         PlaceholderText="貼上或輸入文字，再按「開始掃描」（Ctrl+Enter）。"
+                         TextChanged="SourceBox_TextChanged" />
+            </Grid>
+            <Grid Grid.Column="1" RowSpacing="6">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid>
+                    <TextBlock Text="轉換結果" Style="{StaticResource SubtitleTextBlockStyle}" />
+                    <TextBlock x:Name="ResultSummary" HorizontalAlignment="Right" VerticalAlignment="Bottom" Opacity="0.7" Text="尚未掃描" />
+                </Grid>
+                <TextBox x:Name="ResultBox" Grid.Row="1" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap"
+                         FontFamily="Consolas, Microsoft JhengHei UI" FontSize="15"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         PlaceholderText="掃描後會在這裡顯示結果。" />
+            </Grid>
+        </Grid>
+
+        <Border Grid.Row="2" Padding="12" CornerRadius="8"
+                Background="{ThemeResource LayerFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+            <Grid RowSpacing="6">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <TextBlock Text="逐處建議" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                    <TextBlock x:Name="SuggestionHint" Opacity="0.7" VerticalAlignment="Center" FontSize="12" />
+                </StackPanel>
+                <TextBlock x:Name="StatusText" Grid.Row="1" TextWrapping="Wrap" Opacity="0.8"
+                           Text="輸入或開啟文字後，按「開始掃描」查看建議。" />
+                <ListView x:Name="SuggestionList" Grid.Row="2" SelectionMode="None">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="local:SuggestionRow">
+                            <Grid Padding="0,8" ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Spacing="2">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <TextBlock Text="{x:Bind From}" Opacity="0.7" />
+                                        <TextBlock Text="→" Opacity="0.7" />
+                                        <TextBlock Text="{x:Bind To}" FontWeight="SemiBold" />
+                                        <Border Padding="6,1" CornerRadius="8" Background="{x:Bind BadgeBrush}">
+                                            <TextBlock Text="{x:Bind Badge}" FontSize="11" />
+                                        </Border>
+                                        <TextBlock Text="{x:Bind State}" FontSize="12" Opacity="0.7" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                    <TextBlock Text="{x:Bind Context}" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+                                    <TextBlock Text="{x:Bind Tip}" TextWrapping="Wrap" />
+                                    <TextBlock Text="{x:Bind Example}" FontSize="12" Opacity="0.7" TextWrapping="Wrap"
+                                               Visibility="{x:Bind ExampleVisibility}" />
+                                </StackPanel>
+                                <Button Grid.Column="1" VerticalAlignment="Top" Content="{x:Bind ButtonLabel}"
+                                        Tag="{x:Bind Start}" Click="Toggle_Click" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

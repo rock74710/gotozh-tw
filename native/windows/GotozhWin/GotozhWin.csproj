@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RootNamespace>GotozhWin</RootNamespace>
+    <Platforms>x64</Platforms>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <UseWinUI>true</UseWinUI>
+    <WindowsPackageType>None</WindowsPackageType>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- gotozh.exe 與字典資料夾的來源；預設為 swift build -c release 的輸出。 -->
+    <GotozhCoreDir Condition="'$(GotozhCoreDir)' == ''">$(MSBuildThisFileDirectory)..\..\.build\out\Products\Release-windows-x86_64\</GotozhCoreDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.5.1" />
+    <ProjectReference Include="..\GotozhWin.Core\GotozhWin.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(GotozhCoreDir)gotozh.exe" Link="gotozh.exe" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="$(GotozhCoreDir)GotozhNative_GotozhCore.bundle\**\*" LinkBase="GotozhNative_GotozhCore.bundle" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <Target Name="CheckGotozhCore" BeforeTargets="Build">
+    <Error Condition="!Exists('$(GotozhCoreDir)gotozh.exe')" Text="找不到 $(GotozhCoreDir)gotozh.exe，請先在 native 資料夾執行 swift build -c release。" />
+  </Target>
+</Project>
