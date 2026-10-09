@@ -9,11 +9,20 @@
     <UseWinUI>true</UseWinUI>
     <WindowsPackageType>None</WindowsPackageType>
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <!-- 自帶 .NET 執行環境，使用者不必另外安裝 .NET 8。 -->
+    <SelfContained>true</SelfContained>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <!-- gotozh.exe 與字典資料夾的來源；預設為 swift build -c release 的輸出。 -->
     <GotozhCoreDir Condition="'$(GotozhCoreDir)' == ''">$(MSBuildThisFileDirectory)..\..\.build\out\Products\Release-windows-x86_64\</GotozhCoreDir>
+    <!-- Swift 執行環境 DLL 的來源；隨附在程式旁，使用者不必安裝 Swift。 -->
+    <SwiftRuntimeDir Condition="'$(SwiftRuntimeDir)' == ''">$(LOCALAPPDATA)\Programs\Swift\Runtimes\6.4.0\usr\bin\</SwiftRuntimeDir>
   </PropertyGroup>
+  <ItemGroup>
+    <!-- gotozh.exe 實際用到的 DLL（含間接依賴），以 objdump 逐層追出。 -->
+    <SwiftRuntimeDll Include="swiftCore;Foundation;FoundationEssentials;FoundationInternationalization;_FoundationICU;swiftDispatch;dispatch;BlocksRuntime;swiftWinSDK;swift_Concurrency;swift_StringProcessing;swift_RegexParser;swiftCRT;swiftSynchronization;swiftObservation;msvcp140;vcruntime140;vcruntime140_1" />
+    <None Include="@(SwiftRuntimeDll->'$(SwiftRuntimeDir)%(Identity).dll')" CopyToOutputDirectory="PreserveNewest" Visible="false" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.5.1" />
     <ProjectReference Include="..\GotozhWin.Core\GotozhWin.Core.csproj" />
@@ -24,5 +33,6 @@
   </ItemGroup>
   <Target Name="CheckGotozhCore" BeforeTargets="Build">
     <Error Condition="!Exists('$(GotozhCoreDir)gotozh.exe')" Text="找不到 $(GotozhCoreDir)gotozh.exe，請先在 native 資料夾執行 swift build -c release。" />
+    <Error Condition="!Exists('$(SwiftRuntimeDir)swiftCore.dll')" Text="找不到 $(SwiftRuntimeDir)swiftCore.dll，請用 -p:SwiftRuntimeDir=... 指定 Swift 執行環境資料夾。" />
   </Target>
 </Project>

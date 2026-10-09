@@ -37,7 +37,7 @@
 
    預期輸出「外送駕駛」。第一行讓 PowerShell 用 UTF-8 把文字送進程式並顯示結果。只執行 `chcp 65001` 不夠：PowerShell 5.1 仍用 ASCII 傳送管線文字，程式只會收到並輸出「?????」。
 
-5. 發行版：`swift build -c release`。沒有開啟 Windows「開發人員模式」時無法建立 `.build\release` 捷徑，執行檔實際在 `.build\out\Products\Release-windows-x86_64\gotozh.exe`。同一資料夾裡的 `GotozhNative_GotozhCore.bundle` 資料夾（字典檔）必須和 `gotozh.exe` 放在一起，複製到別處時要一起帶走。執行的電腦也需要 Swift 執行環境（安裝 Swift 時已一併加入 PATH）；缺少時程式會直接結束，代碼 -1073741515（找不到 DLL）。
+5. 發行版：`swift build -c release`。沒有開啟 Windows「開發人員模式」時無法建立 `.build\release` 捷徑，執行檔實際在 `.build\out\Products\Release-windows-x86_64\gotozh.exe`。同一資料夾裡的 `GotozhNative_GotozhCore.bundle` 資料夾（字典檔）必須和 `gotozh.exe` 放在一起，複製到別處時要一起帶走。單獨複製這個 gotozh.exe 時，執行的電腦需要 Swift 執行環境；缺少時程式會直接結束，代碼 -1073741515（找不到 DLL）。要免安裝，請改用下方視窗版的建置輸出（或 `native\dist\windows-x64`），裡面已附 Swift DLL。
 
 ## 可能遇到的問題
 
@@ -84,4 +84,4 @@
 
 - 視窗版使用 Windows App SDK 2.5.1。舊版 1.6 用 `dotnet build` 會因缺少打包工具而失敗，所以不要降版。
 
-- 目前還不是安裝程式。執行的電腦仍需要 Swift 執行環境（同命令列版）；缺少時按掃描會跳出「找不到 Swift 執行環境的 DLL」。
+- 目前還不是安裝程式，但整個 `win-x64` 資料夾可直接複製使用：建置時會放入 gotozh.exe 用到的 18 個 Swift／VC++ DLL，並自帶 .NET 8，使用者不必安裝 Swift 或 .NET。DLL 預設取自 `%LOCALAPPDATA%\Programs\Swift\Runtimes\6.4.0\usr\bin`；Swift 版本不同時用 `dotnet build -c Release -p:SwiftRuntimeDir=<資料夾>\` 指定。
